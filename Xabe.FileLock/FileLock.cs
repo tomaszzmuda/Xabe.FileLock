@@ -60,6 +60,9 @@ namespace Xabe.FileLock
             return new FileLock(fileToLock, lockTime, refreshContinuously);
         }
 
+        /// <summary>
+        ///     Stop refreshing lock and delete lock file
+        /// </summary>
         public void Dispose()
         {
             _canceller.Cancel();
