@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+#exit if any command fails
+set -e
+
+dotnet restore Xabe.FileLock.Test/
+dotnet test Xabe.FileLock.Test/
+dotnet restore Xabe.FileLock/
+dotnet build Xabe.FileLock/ -c Release

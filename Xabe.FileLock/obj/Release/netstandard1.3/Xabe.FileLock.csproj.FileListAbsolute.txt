@@ -1,0 +1,8 @@
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\bin\Release\netstandard1.3\Xabe.FileLock.deps.json
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\bin\Release\netstandard1.3\Xabe.FileLock.xml
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\bin\Release\netstandard1.3\Xabe.FileLock.dll
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\bin\Release\netstandard1.3\Xabe.FileLock.pdb
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\obj\Release\netstandard1.3\Xabe.FileLock.csproj.CoreCompileInputs.cache
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\obj\Release\netstandard1.3\Xabe.FileLock.AssemblyInfo.cs
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\obj\Release\netstandard1.3\Xabe.FileLock.dll
+C:\Users\tzmuda.POSTDATA\Source\Repos\Xabe.FileLock\Xabe.FileLock\obj\Release\netstandard1.3\Xabe.FileLock.pdb
