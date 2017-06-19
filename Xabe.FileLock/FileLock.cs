@@ -35,7 +35,7 @@ namespace Xabe.FileLock
             var refreshTime = (int)(lockTime.TotalMilliseconds * 0.9);
             while (!_canceller.Token.IsCancellationRequested)
             {
-                Thread.Sleep(refreshTime);
+                Task.Delay(refreshTime);
                 AddLockTime(TimeSpan.FromMilliseconds(refreshTime));
             }
         }

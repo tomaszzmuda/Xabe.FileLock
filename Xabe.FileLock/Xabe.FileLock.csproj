@@ -1,7 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Xabe.FileLock</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageLicenseUrl>https://github.com/tomaszzmuda/Xabe.FileLock/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/tomaszzmuda/Xabe.FileLock</PackageProjectUrl>
+    <PackageTags>file lock filelock file-lock locking files concurrency core</PackageTags>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <Authors>Tomasz Żmuda</Authors>
+    <Company>Xabe</Company>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Description>Simple .net core library providing exclusive lock on file.</Description>
+    <RepositoryUrl>https://github.com/tomaszzmuda/Xabe.FileLock</RepositoryUrl>
+    <RepositoryType>Dependency</RepositoryType>
+    <Copyright>Copyright 2017 (c) Tomasz Zmuda.</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.3\Xabe.FileLock.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.3\Xabe.FileLock.xml</DocumentationFile>
+  </PropertyGroup>
 </Project>
