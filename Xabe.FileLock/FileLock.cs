@@ -30,6 +30,13 @@ namespace Xabe.FileLock
             }
         }
 
+        private FileLock(FileInfo fileToLock, DateTime releaseDate)
+        {
+            _path = GetLockFileName(fileToLock);
+            ReleaseDate = releaseDate;
+            _canceller = new CancellationTokenSource();
+        }
+
         private DateTime ReleaseDate { get => GetDateTime(_path); set => File.WriteAllText(_path, value.Ticks.ToString(), Encoding.UTF8); }
 
         /// <summary>
@@ -64,6 +71,27 @@ namespace Xabe.FileLock
         ///     Acquire lock.
         /// </summary>
         /// <param name="fileToLock">File to lock</param>
+        /// <param name="releaseDate">Date after that lock is released</param>
+        /// <returns>File lock. Null if lock already exists.</returns>
+        public static FileLock Acquire(FileInfo fileToLock, DateTime releaseDate)
+        {
+            if(!File.Exists(GetLockFileName(fileToLock)))
+            {
+                return new FileLock(fileToLock, releaseDate);
+            }
+
+            var lockReleaseDate = GetDateTime(GetLockFileName(fileToLock));
+            if(lockReleaseDate > DateTime.UtcNow)
+            {
+                return null;
+            }
+            return new FileLock(fileToLock, releaseDate);
+        }
+
+        /// <summary>
+        ///     Acquire lock.
+        /// </summary>
+        /// <param name="fileToLock">File to lock</param>
         /// <param name="lockTime">Amount of time after that lock is released</param>
         /// <param name="refreshContinuously">Specify if FileLock should automatically refresh lock.</param>
         /// <returns>File lock. Null if lock already exists.</returns>
@@ -81,6 +109,7 @@ namespace Xabe.FileLock
             }
             return new FileLock(fileToLock, lockTime, refreshContinuously);
         }
+
 
         private static DateTime GetDateTime(string path)
         {
