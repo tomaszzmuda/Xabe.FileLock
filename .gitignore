@@ -6,3 +6,6 @@
 /Xabe.FileLock/nuget
 /Xabe.FileLock/bin/Release/netstandard1.3
 /Xabe.FileLock.Test/obj
+/Xabe.FileLock.Test/bin/Debug/netcoreapp2.0
+/Xabe.FileLock/bin/Debug/netstandard1.3
+/.vs/Xabe.FileLock/v15/sqlite3
