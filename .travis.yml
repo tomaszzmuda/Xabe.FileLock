@@ -9,5 +9,5 @@ script:
  - dotnet build Xabe.FileLock/ -c Release
  - dotnet pack Xabe.FileLock
  after_succes:
- - if [ "$TRAVIS_TAG" != "" ]; then dotnet pack Xabe.FileLock -c Release -o nuget /p:PackageVersion=$TRAVIS_TAG; fi
+ - if [ $TRAVIS_TAG != '' ]; then dotnet pack Xabe.FileLock -c Release -o nuget /p:PackageVersion=$TRAVIS_TAG; fi
  
