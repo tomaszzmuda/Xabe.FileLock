@@ -1,6 +1,6 @@
 #!/bin/bash
-#dotnet restore
-#dotnet test Xabe.FileLock.Test/
+dotnet restore
+dotnet test Xabe.FileLock.Test/
 if [[ -z "${TRAVIS_TAG}" ]]; then 
 	exit 0
 else
