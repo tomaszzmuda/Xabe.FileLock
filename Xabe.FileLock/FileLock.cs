@@ -9,7 +9,7 @@ namespace Xabe.FileLock
     /// <summary>
     ///     Providing file locks
     /// </summary>
-    public class FileLock: IDisposable
+    public class FileLock: ILock
     {
         private const string Extension = "lock";
         private readonly CancellationTokenSource _canceller;
@@ -48,23 +48,23 @@ namespace Xabe.FileLock
             File.Delete(_path);
         }
 
+        /// <summary>
+        ///     Extend lock by certain amount of time
+        /// </summary>
+        /// <param name="lockTime">How much time add to lock</param>
+        public void AddTime(TimeSpan lockTime)
+        {
+            ReleaseDate = ReleaseDate + lockTime;
+        }
+
         private void RefreshLockTime(TimeSpan lockTime)
         {
             var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
             while(!_canceller.Token.IsCancellationRequested)
             {
                 Task.Delay(refreshTime);
-                AddLockTime(TimeSpan.FromMilliseconds(refreshTime));
+                AddTime(TimeSpan.FromMilliseconds(refreshTime));
             }
-        }
-
-        /// <summary>
-        ///     Extend lock by certain amount of time
-        /// </summary>
-        /// <param name="lockTime"></param>
-        public void AddLockTime(TimeSpan lockTime)
-        {
-            ReleaseDate = ReleaseDate + lockTime;
         }
 
         /// <summary>
@@ -73,14 +73,14 @@ namespace Xabe.FileLock
         /// <param name="fileToLock">File to lock</param>
         /// <param name="releaseDate">Date after that lock is released</param>
         /// <returns>File lock. Null if lock already exists.</returns>
-        public static FileLock Acquire(FileInfo fileToLock, DateTime releaseDate)
+        public static ILock Acquire(FileInfo fileToLock, DateTime releaseDate)
         {
             if(!File.Exists(GetLockFileName(fileToLock)))
             {
                 return new FileLock(fileToLock, releaseDate);
             }
 
-            var lockReleaseDate = GetDateTime(GetLockFileName(fileToLock));
+            DateTime lockReleaseDate = GetDateTime(GetLockFileName(fileToLock));
             if(lockReleaseDate > DateTime.UtcNow)
             {
                 return null;
@@ -95,14 +95,14 @@ namespace Xabe.FileLock
         /// <param name="lockTime">Amount of time after that lock is released</param>
         /// <param name="refreshContinuously">Specify if FileLock should automatically refresh lock.</param>
         /// <returns>File lock. Null if lock already exists.</returns>
-        public static FileLock Acquire(FileInfo fileToLock, TimeSpan lockTime, bool refreshContinuously = false)
+        public static ILock Acquire(FileInfo fileToLock, TimeSpan lockTime, bool refreshContinuously = false)
         {
             if(!File.Exists(GetLockFileName(fileToLock)))
             {
                 return new FileLock(fileToLock, lockTime, refreshContinuously);
             }
 
-            var releaseDate = GetDateTime(GetLockFileName(fileToLock));
+            DateTime releaseDate = GetDateTime(GetLockFileName(fileToLock));
             if(releaseDate > DateTime.UtcNow)
             {
                 return null;

@@ -10,7 +10,7 @@ Install the [Xabe.FileLock NuGet package](https://www.nuget.org/packages/Xabe.Fi
 	
 Creating file lock:
 
-	var fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(15), true);
+	ILock fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(15), true);
 	
 This will create lock file with extension ".lock" in the same directory. Example: "/tmp/data.txt" -> "/tmp/data.lock".
 
@@ -20,7 +20,7 @@ If file already has lock file, and it time haven't expired, method returns null.
 
 ## Recommended using ##
 
-	using(var fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(15), true))
+	using(ILock fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(15), true))
 	{
 		// file operations here
 	}

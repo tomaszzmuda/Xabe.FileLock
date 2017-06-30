@@ -24,7 +24,7 @@ namespace Xabe.FileLock.Test
         public void AcquireSecondLockAfterRelease()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            FileLock fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(1));
+            ILock fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(1));
             Thread.Sleep(1500);
             fileLock = FileLock.Acquire(file, TimeSpan.FromSeconds(10));
 
@@ -57,8 +57,8 @@ namespace Xabe.FileLock.Test
         public void BasicLockWithAddTime()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            var fileLock = FileLock.Acquire(file, TimeSpan.FromHours(1));
-            fileLock.AddLockTime(TimeSpan.FromHours(1));
+            ILock fileLock = FileLock.Acquire(file, TimeSpan.FromHours(1));
+            fileLock.AddTime(TimeSpan.FromHours(1));
 
             Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
             var fileDate = new DateTime(long.Parse(File.ReadAllText(Path.ChangeExtension(file.FullName, Extension))));
@@ -69,7 +69,7 @@ namespace Xabe.FileLock.Test
         public void Dispose()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            using(var fileLock = FileLock.Acquire(file, TimeSpan.FromHours(1)))
+            using(ILock fileLock = FileLock.Acquire(file, TimeSpan.FromHours(1)))
             {
                 Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
             }
