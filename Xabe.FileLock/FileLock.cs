@@ -12,29 +12,16 @@ namespace Xabe.FileLock
     public class FileLock: ILock
     {
         private const string Extension = "lock";
-        private readonly CancellationTokenSource _canceller;
         private readonly string _path;
+        private CancellationTokenSource _canceller;
 
         private FileLock()
         {
         }
 
-        private FileLock(FileInfo fileToLock, TimeSpan lockTime, bool refreshContinuously)
+        public FileLock(FileInfo fileToLock)
         {
             _path = GetLockFileName(fileToLock);
-            ReleaseDate = DateTime.UtcNow + lockTime;
-            _canceller = new CancellationTokenSource();
-            if(refreshContinuously)
-            {
-                Task.Run(() => RefreshLockTime(lockTime), _canceller.Token);
-            }
-        }
-
-        private FileLock(FileInfo fileToLock, DateTime releaseDate)
-        {
-            _path = GetLockFileName(fileToLock);
-            ReleaseDate = releaseDate;
-            _canceller = new CancellationTokenSource();
         }
 
         private DateTime ReleaseDate { get => GetDateTime(_path); set => File.WriteAllText(_path, value.Ticks.ToString(), Encoding.UTF8); }
@@ -57,6 +44,41 @@ namespace Xabe.FileLock
             ReleaseDate = ReleaseDate + lockTime;
         }
 
+        /// <inheritdoc />
+        public bool TryAcquire(DateTime releaseDate)
+        {
+            if(File.Exists(_path) &&
+               GetDateTime(_path) > DateTime.UtcNow)
+            {
+                return false;
+            }
+
+            ReleaseDate = releaseDate;
+            _canceller = new CancellationTokenSource();
+            return true;
+        }
+
+        /// <inheritdoc />
+        public bool TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
+        {
+            if(File.Exists(_path) &&
+               GetDateTime(_path) > DateTime.UtcNow)
+            {
+                return false;
+            }
+            ReleaseDate = DateTime.UtcNow + lockTime;
+            _canceller = new CancellationTokenSource();
+            if(refreshContinuously)
+            {
+                Task.Run(() => RefreshLockTime(lockTime), _canceller.Token);
+            }
+            return true;
+        }
+
+        public void Release()
+        {
+        }
+
         private void RefreshLockTime(TimeSpan lockTime)
         {
             var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
@@ -66,50 +88,6 @@ namespace Xabe.FileLock
                 AddTime(TimeSpan.FromMilliseconds(refreshTime));
             }
         }
-
-        /// <summary>
-        ///     Acquire lock.
-        /// </summary>
-        /// <param name="fileToLock">File to lock</param>
-        /// <param name="releaseDate">Date after that lock is released</param>
-        /// <returns>File lock. Null if lock already exists.</returns>
-        public static ILock Acquire(FileInfo fileToLock, DateTime releaseDate)
-        {
-            if(!File.Exists(GetLockFileName(fileToLock)))
-            {
-                return new FileLock(fileToLock, releaseDate);
-            }
-
-            DateTime lockReleaseDate = GetDateTime(GetLockFileName(fileToLock));
-            if(lockReleaseDate > DateTime.UtcNow)
-            {
-                return null;
-            }
-            return new FileLock(fileToLock, releaseDate);
-        }
-
-        /// <summary>
-        ///     Acquire lock.
-        /// </summary>
-        /// <param name="fileToLock">File to lock</param>
-        /// <param name="lockTime">Amount of time after that lock is released</param>
-        /// <param name="refreshContinuously">Specify if FileLock should automatically refresh lock.</param>
-        /// <returns>File lock. Null if lock already exists.</returns>
-        public static ILock Acquire(FileInfo fileToLock, TimeSpan lockTime, bool refreshContinuously = false)
-        {
-            if(!File.Exists(GetLockFileName(fileToLock)))
-            {
-                return new FileLock(fileToLock, lockTime, refreshContinuously);
-            }
-
-            DateTime releaseDate = GetDateTime(GetLockFileName(fileToLock));
-            if(releaseDate > DateTime.UtcNow)
-            {
-                return null;
-            }
-            return new FileLock(fileToLock, lockTime, refreshContinuously);
-        }
-
 
         private static DateTime GetDateTime(string path)
         {

@@ -12,5 +12,25 @@ namespace Xabe.FileLock
         /// </summary>
         /// <param name="lockTime">How much time add to lock</param>
         void AddTime(TimeSpan lockTime);
+
+        /// <summary>
+        ///     Acquire lock.
+        /// </summary>
+        /// <param name="releaseDate">Date after that lock is released</param>
+        /// <returns>File lock. False if lock already exists.</returns>
+        bool TryAcquire(DateTime releaseDate);
+
+        /// <summary>
+        ///     Acquire lock.
+        /// </summary>
+        /// <param name="lockTime">Amount of time after that lock is released</param>
+        /// <param name="refreshContinuously">Specify if FileLock should automatically refresh lock.</param>
+        /// <returns>File lock. False if lock already exists.</returns>
+        bool TryAcquire(TimeSpan lockTime, bool refreshContinuously = false);
+
+        /// <summary>
+        ///     Delete lock file
+        /// </summary>
+        void Release();
     }
 }
