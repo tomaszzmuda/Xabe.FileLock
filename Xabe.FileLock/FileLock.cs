@@ -35,9 +35,7 @@ namespace Xabe.FileLock
         {
             _timer?.Dispose();
             if(File.Exists(_path))
-            {
                 File.Delete(_path);
-            }
         }
 
         /// <summary>
@@ -52,8 +50,13 @@ namespace Xabe.FileLock
         /// <inheritdoc />
         public async Task<bool> TryAcquire(DateTime releaseDate)
         {
-            if(File.Exists(_path) &&
-               await GetDateTime(_path) > DateTime.UtcNow)
+            try
+            {
+                if(File.Exists(_path) &&
+                   await GetDateTime(_path) > DateTime.UtcNow)
+                    return false;
+            }
+            catch(Exception)
             {
                 return false;
             }
@@ -65,12 +68,17 @@ namespace Xabe.FileLock
         /// <inheritdoc />
         public async Task<bool> TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
         {
-            if(File.Exists(_path) &&
-               await GetDateTime(_path) > DateTime.UtcNow)
+            try
+            {
+                if(File.Exists(_path) &&
+                   await GetDateTime(_path) > DateTime.UtcNow)
+                    return false;
+                await SetReleaseDate(DateTime.UtcNow + lockTime);
+            }
+            catch(Exception)
             {
                 return false;
             }
-            await SetReleaseDate(DateTime.UtcNow + lockTime);
             if(refreshContinuously)
             {
                 var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
@@ -101,8 +109,8 @@ namespace Xabe.FileLock
             {
                 using(var sr = new StreamReader(fs, Encoding.UTF8))
                 {
-                    var text = await sr.ReadToEndAsync();
-                    var ticks = long.Parse(text);
+                    string text = await sr.ReadToEndAsync();
+                    long ticks = long.Parse(text);
                     return new DateTime(ticks);
                 }
             }

@@ -16,7 +16,7 @@ namespace Xabe.FileLock.Test
             var file = new FileInfo(Path.GetTempFileName());
             await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
 
-            var fileLock = await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
+            bool fileLock = await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
             Assert.False(fileLock);
         }
 
@@ -73,14 +73,14 @@ namespace Xabe.FileLock.Test
             var file = new FileInfo(Path.GetTempFileName());
             ILock fileLock = new FileLock(file);
             if(await fileLock.TryAcquire(TimeSpan.FromHours(1)))
-            {
                 using(fileLock)
                 {
                     string pathToLock = Path.ChangeExtension(file.FullName, Extension);
-                    using(var stream = File.Open(pathToLock, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+                    using(FileStream stream = File.Open(pathToLock, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+                    {
                         fileLock.AddTime(TimeSpan.FromHours(1));
+                    }
                 }
-            }
 
             Assert.False(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
         }
@@ -91,12 +91,10 @@ namespace Xabe.FileLock.Test
             var file = new FileInfo(Path.GetTempFileName());
             ILock fileLock = new FileLock(file);
             if(await fileLock.TryAcquire(TimeSpan.FromHours(1)))
-            {
                 using(fileLock)
                 {
                     Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
                 }
-            }
 
             Assert.False(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
         }
