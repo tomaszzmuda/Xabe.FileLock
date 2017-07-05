@@ -11,32 +11,32 @@ namespace Xabe.FileLock.Test
         private const string Extension = "lock";
 
         [Fact]
-        public void AcquireSecondLock()
+        public async void AcquireSecondLock()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
+            await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
 
-            var fileLock = new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
+            var fileLock = await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
             Assert.False(fileLock);
         }
 
         [Fact]
-        public void AcquireSecondLockAfterRelease()
+        public async void AcquireSecondLockAfterRelease()
         {
             var file = new FileInfo(Path.GetTempFileName());
             ILock fileLock = new FileLock(file);
-            fileLock.TryAcquire(TimeSpan.FromSeconds(1));
+            await fileLock.TryAcquire(TimeSpan.FromSeconds(1));
             Thread.Sleep(1500);
-            fileLock.TryAcquire(TimeSpan.FromSeconds(10));
+            await fileLock.TryAcquire(TimeSpan.FromSeconds(10));
 
             Assert.NotNull(fileLock);
         }
 
         [Fact]
-        public void BasicLock()
+        public async void BasicLock()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
+            await new FileLock(file).TryAcquire(TimeSpan.FromHours(1));
 
             Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
             var fileDate = new DateTime(long.Parse(File.ReadAllText(Path.ChangeExtension(file.FullName, Extension))));
@@ -44,10 +44,10 @@ namespace Xabe.FileLock.Test
         }
 
         [Fact]
-        public void BasicLockToDate()
+        public async void BasicLockToDate()
         {
             var file = new FileInfo(Path.GetTempFileName());
-            new FileLock(file).TryAcquire(DateTime.UtcNow + TimeSpan.FromHours(1));
+            await new FileLock(file).TryAcquire(DateTime.UtcNow + TimeSpan.FromHours(1));
 
             Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
             var fileDate = new DateTime(long.Parse(File.ReadAllText(Path.ChangeExtension(file.FullName, Extension))));
@@ -55,11 +55,11 @@ namespace Xabe.FileLock.Test
         }
 
         [Fact]
-        public void BasicLockWithAddTime()
+        public async void BasicLockWithAddTime()
         {
             var file = new FileInfo(Path.GetTempFileName());
             var fileLock = new FileLock(file);
-            fileLock.TryAcquire(TimeSpan.FromHours(1));
+            await fileLock.TryAcquire(TimeSpan.FromHours(1));
             fileLock.AddTime(TimeSpan.FromHours(1));
 
             Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
@@ -68,11 +68,29 @@ namespace Xabe.FileLock.Test
         }
 
         [Fact]
-        public void Dispose()
+        public async void CannotWriteToFile()
         {
             var file = new FileInfo(Path.GetTempFileName());
             ILock fileLock = new FileLock(file);
-            if(fileLock.TryAcquire(TimeSpan.FromHours(1)))
+            if(await fileLock.TryAcquire(TimeSpan.FromHours(1)))
+            {
+                using(fileLock)
+                {
+                    string pathToLock = Path.ChangeExtension(file.FullName, Extension);
+                    using(var stream = File.Open(pathToLock, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+                        fileLock.AddTime(TimeSpan.FromHours(1));
+                }
+            }
+
+            Assert.False(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
+        }
+
+        [Fact]
+        public async void Dispose()
+        {
+            var file = new FileInfo(Path.GetTempFileName());
+            ILock fileLock = new FileLock(file);
+            if(await fileLock.TryAcquire(TimeSpan.FromHours(1)))
             {
                 using(fileLock)
                 {

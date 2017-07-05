@@ -13,87 +13,99 @@ namespace Xabe.FileLock
     {
         private const string Extension = "lock";
         private readonly string _path;
-        private CancellationTokenSource _canceller;
+        private Timer _timer;
 
         private FileLock()
         {
         }
 
+        /// <summary>
+        ///     Creates reference to file lock on target file
+        /// </summary>
+        /// <param name="fileToLock"></param>
         public FileLock(FileInfo fileToLock)
         {
             _path = GetLockFileName(fileToLock);
         }
-
-        private DateTime ReleaseDate { get => GetDateTime(_path); set => File.WriteAllText(_path, value.Ticks.ToString(), Encoding.UTF8); }
 
         /// <summary>
         ///     Stop refreshing lock and delete lock file
         /// </summary>
         public void Dispose()
         {
-            _canceller.Cancel();
-            File.Delete(_path);
+            _timer?.Dispose();
+            if(File.Exists(_path))
+            {
+                File.Delete(_path);
+            }
         }
 
         /// <summary>
         ///     Extend lock by certain amount of time
         /// </summary>
         /// <param name="lockTime">How much time add to lock</param>
-        public void AddTime(TimeSpan lockTime)
+        public async void AddTime(TimeSpan lockTime)
         {
-            ReleaseDate = ReleaseDate + lockTime;
+            await SetReleaseDate(await GetReleaseDate() + lockTime);
         }
 
         /// <inheritdoc />
-        public bool TryAcquire(DateTime releaseDate)
+        public async Task<bool> TryAcquire(DateTime releaseDate)
         {
             if(File.Exists(_path) &&
-               GetDateTime(_path) > DateTime.UtcNow)
+               await GetDateTime(_path) > DateTime.UtcNow)
             {
                 return false;
             }
 
-            ReleaseDate = releaseDate;
-            _canceller = new CancellationTokenSource();
+            await SetReleaseDate(releaseDate);
             return true;
         }
 
         /// <inheritdoc />
-        public bool TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
+        public async Task<bool> TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
         {
             if(File.Exists(_path) &&
-               GetDateTime(_path) > DateTime.UtcNow)
+               await GetDateTime(_path) > DateTime.UtcNow)
             {
                 return false;
             }
-            ReleaseDate = DateTime.UtcNow + lockTime;
-            _canceller = new CancellationTokenSource();
+            await SetReleaseDate(DateTime.UtcNow + lockTime);
             if(refreshContinuously)
             {
-                Task.Run(() => RefreshLockTime(lockTime), _canceller.Token);
+                var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
+                _timer = new Timer(state => AddTime(TimeSpan.FromMilliseconds(refreshTime)), null, 0, refreshTime);
             }
             return true;
         }
 
-        public void Release()
+        private async Task<DateTime> GetReleaseDate()
         {
+            return await GetDateTime(_path);
         }
 
-        private void RefreshLockTime(TimeSpan lockTime)
+        private async Task SetReleaseDate(DateTime date)
         {
-            var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
-            while(!_canceller.Token.IsCancellationRequested)
+            using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
             {
-                Task.Delay(refreshTime);
-                AddTime(TimeSpan.FromMilliseconds(refreshTime));
+                using(var sr = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    await sr.WriteAsync(date.Ticks.ToString());
+                }
             }
         }
 
-        private static DateTime GetDateTime(string path)
+        private static async Task<DateTime> GetDateTime(string path)
         {
-            var text = File.ReadAllText(path);
-            var ticks = long.Parse(text);
-            return new DateTime(ticks);
+            using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using(var sr = new StreamReader(fs, Encoding.UTF8))
+                {
+                    var text = await sr.ReadToEndAsync();
+                    var ticks = long.Parse(text);
+                    return new DateTime(ticks);
+                }
+            }
         }
 
         private static string GetLockFileName(FileInfo file)
