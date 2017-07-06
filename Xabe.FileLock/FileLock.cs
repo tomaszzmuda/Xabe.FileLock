@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Xabe.FileLock
 {
@@ -12,6 +11,7 @@ namespace Xabe.FileLock
     public class FileLock: ILock
     {
         private const string Extension = "lock";
+        private readonly object _fileLock = new object();
         private readonly string _path;
         private Timer _timer;
 
@@ -22,10 +22,19 @@ namespace Xabe.FileLock
         /// <summary>
         ///     Creates reference to file lock on target file
         /// </summary>
-        /// <param name="fileToLock"></param>
+        /// <param name="fileToLock">File which we want lock</param>
         public FileLock(FileInfo fileToLock)
         {
             _path = GetLockFileName(fileToLock);
+        }
+
+        /// <summary>
+        ///     Creates reference to file lock on target file
+        /// </summary>
+        /// <param name="path"></param>
+        public FileLock(string path)
+        {
+            _path = GetLockFileName(new FileInfo(path));
         }
 
         /// <summary>
@@ -42,18 +51,18 @@ namespace Xabe.FileLock
         ///     Extend lock by certain amount of time
         /// </summary>
         /// <param name="lockTime">How much time add to lock</param>
-        public async void AddTime(TimeSpan lockTime)
+        public void AddTime(TimeSpan lockTime)
         {
-            await SetReleaseDate(await GetReleaseDate() + lockTime);
+            SetReleaseDate(GetReleaseDate() + lockTime);
         }
 
         /// <inheritdoc />
-        public async Task<bool> TryAcquire(DateTime releaseDate)
+        public bool TryAcquire(DateTime releaseDate)
         {
             try
             {
                 if(File.Exists(_path) &&
-                   await GetDateTime(_path) > DateTime.UtcNow)
+                   GetDateTime(_path) > DateTime.UtcNow)
                     return false;
             }
             catch(Exception)
@@ -61,19 +70,24 @@ namespace Xabe.FileLock
                 return false;
             }
 
-            await SetReleaseDate(releaseDate);
+            SetReleaseDate(releaseDate);
             return true;
         }
 
         /// <inheritdoc />
-        public async Task<bool> TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
+        public bool TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
         {
+            if(!File.Exists(_path))
+            {
+                SetReleaseDate(DateTime.UtcNow + lockTime);
+                return true;
+            }
             try
             {
                 if(File.Exists(_path) &&
-                   await GetDateTime(_path) > DateTime.UtcNow)
+                   GetDateTime(_path) > DateTime.UtcNow)
                     return false;
-                await SetReleaseDate(DateTime.UtcNow + lockTime);
+                SetReleaseDate(DateTime.UtcNow + lockTime);
             }
             catch(Exception)
             {
@@ -87,31 +101,37 @@ namespace Xabe.FileLock
             return true;
         }
 
-        private async Task<DateTime> GetReleaseDate()
+        private DateTime GetReleaseDate()
         {
-            return await GetDateTime(_path);
+            return GetDateTime(_path);
         }
 
-        private async Task SetReleaseDate(DateTime date)
+        private void SetReleaseDate(DateTime date)
         {
-            using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
+            lock(_fileLock)
             {
-                using(var sr = new StreamWriter(fs, Encoding.UTF8))
+                using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
                 {
-                    await sr.WriteAsync(date.Ticks.ToString());
+                    using(var sr = new StreamWriter(fs, Encoding.UTF8))
+                    {
+                        sr.Write(date.Ticks.ToString());
+                    }
                 }
             }
         }
 
-        private static async Task<DateTime> GetDateTime(string path)
+        private DateTime GetDateTime(string path)
         {
-            using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            lock(_fileLock)
             {
-                using(var sr = new StreamReader(fs, Encoding.UTF8))
+                using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    string text = await sr.ReadToEndAsync();
-                    long ticks = long.Parse(text);
-                    return new DateTime(ticks);
+                    using(var sr = new StreamReader(fs, Encoding.UTF8))
+                    {
+                        string text = sr.ReadToEnd();
+                        long ticks = long.Parse(text);
+                        return new DateTime(ticks);
+                    }
                 }
             }
         }
