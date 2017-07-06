@@ -22,19 +22,18 @@ namespace Xabe.FileLock
         /// <summary>
         ///     Creates reference to file lock on target file
         /// </summary>
-        /// <param name="fileToLock">File which we want lock</param>
-        public FileLock(FileInfo fileToLock)
+        /// <param name="fileToLock">File we want lock</param>
+        public FileLock(FileInfo fileToLock): this(fileToLock.FullName)
         {
-            _path = GetLockFileName(fileToLock);
         }
 
         /// <summary>
         ///     Creates reference to file lock on target file
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to file we want lock</param>
         public FileLock(string path)
         {
-            _path = GetLockFileName(new FileInfo(path));
+            _path = GetLockFileName(path);
         }
 
         /// <summary>
@@ -110,7 +109,7 @@ namespace Xabe.FileLock
         {
             lock(_fileLock)
             {
-                using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
+                using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
                     using(var sr = new StreamWriter(fs, Encoding.UTF8))
                     {
@@ -124,7 +123,7 @@ namespace Xabe.FileLock
         {
             lock(_fileLock)
             {
-                using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     using(var sr = new StreamReader(fs, Encoding.UTF8))
                     {
@@ -136,9 +135,9 @@ namespace Xabe.FileLock
             }
         }
 
-        private static string GetLockFileName(FileInfo file)
+        private static string GetLockFileName(string path)
         {
-            return Path.ChangeExtension(file.FullName, Extension);
+            return Path.ChangeExtension(path, Extension);
         }
     }
 }
