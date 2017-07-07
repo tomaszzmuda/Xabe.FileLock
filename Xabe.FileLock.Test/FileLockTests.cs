@@ -105,7 +105,8 @@ namespace Xabe.FileLock.Test
             var result = true;
             for(int j = 0; j < i; j++)
             {
-                if(!new FileLock(new FileInfo(Path.GetTempFileName())).TryAcquire(TimeSpan.FromHours(1)))
+                var file = new FileInfo(Path.GetTempFileName());
+                if (!new FileLock(file).TryAcquire(TimeSpan.FromHours(1)) && !File.Exists(Path.ChangeExtension(file.FullName, Extension)))
                 {
                     result = false;
                     break;
