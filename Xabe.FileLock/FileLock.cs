@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 
 namespace Xabe.FileLock
@@ -11,7 +10,7 @@ namespace Xabe.FileLock
     public class FileLock: ILock
     {
         private const string Extension = "lock";
-        private readonly object _fileLock = new object();
+        private readonly LockModel _content;
         private readonly string _path;
         private Timer _timer;
 
@@ -34,6 +33,7 @@ namespace Xabe.FileLock
         public FileLock(string path)
         {
             _path = GetLockFileName(path);
+            _content = new LockModel(_path);
         }
 
         /// <summary>
@@ -52,24 +52,17 @@ namespace Xabe.FileLock
         /// <param name="lockTime">How much time add to lock</param>
         public void AddTime(TimeSpan lockTime)
         {
-            SetReleaseDate(GetReleaseDate() + lockTime);
+            _content.ReleaseDate += lockTime;
         }
 
         /// <inheritdoc />
         public bool TryAcquire(DateTime releaseDate)
         {
-            try
-            {
-                if(File.Exists(_path) &&
-                   GetDateTime(_path) > DateTime.UtcNow)
-                    return false;
-            }
-            catch(Exception)
-            {
+            if(File.Exists(_path) &&
+               _content.ReleaseDate > DateTime.UtcNow)
                 return false;
-            }
 
-            SetReleaseDate(releaseDate);
+            _content.ReleaseDate = releaseDate;
             return true;
         }
 
@@ -78,64 +71,24 @@ namespace Xabe.FileLock
         {
             if(!File.Exists(_path))
             {
-                SetReleaseDate(DateTime.UtcNow + lockTime);
+                _content.ReleaseDate = DateTime.UtcNow + lockTime;
                 return true;
             }
-            try
-            {
-                if(File.Exists(_path) &&
-                   GetDateTime(_path) > DateTime.UtcNow)
-                    return false;
-                SetReleaseDate(DateTime.UtcNow + lockTime);
-            }
-            catch(Exception)
-            {
+            if(File.Exists(_path) &&
+               _content.ReleaseDate > DateTime.UtcNow)
                 return false;
-            }
+            _content.ReleaseDate = DateTime.UtcNow + lockTime;
+
             if(refreshContinuously)
             {
+                var autoEvent = new AutoResetEvent(false);
                 var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
-                _timer = new Timer(state => AddTime(TimeSpan.FromMilliseconds(refreshTime)), null, 0, refreshTime);
+                _timer = new Timer(state => AddTime(TimeSpan.FromMilliseconds(refreshTime)), autoEvent, 0, refreshTime);
             }
             return true;
         }
 
-        private DateTime GetReleaseDate()
-        {
-            return GetDateTime(_path);
-        }
-
-        private void SetReleaseDate(DateTime date)
-        {
-            lock(_fileLock)
-            {
-                using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-                {
-                    using(var sr = new StreamWriter(fs, Encoding.UTF8))
-                    {
-                        sr.Write(date.Ticks.ToString());
-                    }
-                }
-            }
-        }
-
-        private DateTime GetDateTime(string path)
-        {
-            lock(_fileLock)
-            {
-                using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    using(var sr = new StreamReader(fs, Encoding.UTF8))
-                    {
-                        string text = sr.ReadToEnd();
-                        long ticks = long.Parse(text);
-                        return new DateTime(ticks);
-                    }
-                }
-            }
-        }
-
-        private static string GetLockFileName(string path)
+        private string GetLockFileName(string path)
         {
             return Path.ChangeExtension(path, Extension);
         }
