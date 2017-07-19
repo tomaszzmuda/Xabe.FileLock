@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Xabe.FileLock
 {
@@ -50,40 +51,40 @@ namespace Xabe.FileLock
         ///     Extend lock by certain amount of time
         /// </summary>
         /// <param name="lockTime">How much time add to lock</param>
-        public void AddTime(TimeSpan lockTime)
+        public async Task AddTime(TimeSpan lockTime)
         {
-            _content.ReleaseDate += lockTime;
+            await _content.SetReleaseDate(await _content.GetReleaseDate() + lockTime);
         }
 
         /// <inheritdoc />
-        public bool TryAcquire(DateTime releaseDate)
+        public async Task<bool> TryAcquire(DateTime releaseDate)
         {
             if(File.Exists(_path) &&
-               _content.ReleaseDate > DateTime.UtcNow)
+               await _content.GetReleaseDate() > DateTime.UtcNow)
                 return false;
 
-            _content.ReleaseDate = releaseDate;
+            await _content.SetReleaseDate(releaseDate);
             return true;
         }
 
         /// <inheritdoc />
-        public bool TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
+        public async Task<bool> TryAcquire(TimeSpan lockTime, bool refreshContinuously = false)
         {
             if(!File.Exists(_path))
             {
-                _content.ReleaseDate = DateTime.UtcNow + lockTime;
+                await _content.SetReleaseDate(DateTime.Now + lockTime);
                 return true;
             }
             if(File.Exists(_path) &&
-               _content.ReleaseDate > DateTime.UtcNow)
+               await _content.GetReleaseDate() > DateTime.UtcNow)
                 return false;
-            _content.ReleaseDate = DateTime.UtcNow + lockTime;
+            await _content.SetReleaseDate(DateTime.Now + lockTime);
 
             if(refreshContinuously)
             {
                 var autoEvent = new AutoResetEvent(false);
                 var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
-                _timer = new Timer(state => AddTime(TimeSpan.FromMilliseconds(refreshTime)), autoEvent, 0, refreshTime);
+                _timer = new Timer(async state => await AddTime(TimeSpan.FromMilliseconds(refreshTime)), autoEvent, 0, refreshTime);
             }
             return true;
         }
