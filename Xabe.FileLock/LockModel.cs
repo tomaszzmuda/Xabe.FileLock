@@ -6,7 +6,6 @@ namespace Xabe.FileLock
 {
     internal class LockModel
     {
-        private readonly object _fileLock = new object();
         private readonly string _path;
 
         public LockModel(string path)
@@ -18,13 +17,14 @@ namespace Xabe.FileLock
 
         private void SetReleaseDate(DateTime date)
         {
-            lock(_fileLock)
+            lock(this)
             {
                 using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
                     using(var sr = new StreamWriter(fs, Encoding.UTF8))
                     {
-                        sr.Write(date.Ticks.ToString());
+                        sr.Write(date.ToUniversalTime()
+                                     .Ticks);
                     }
                 }
             }
@@ -32,7 +32,7 @@ namespace Xabe.FileLock
 
         private DateTime GetDateTime(string path)
         {
-            lock(_fileLock)
+            lock(this)
             {
                 using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
@@ -40,7 +40,7 @@ namespace Xabe.FileLock
                     {
                         string text = sr.ReadToEnd();
                         long ticks = long.Parse(text);
-                        return new DateTime(ticks);
+                        return new DateTime(ticks, DateTimeKind.Utc);
                     }
                 }
             }
