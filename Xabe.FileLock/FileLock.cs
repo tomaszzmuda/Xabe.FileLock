@@ -13,7 +13,7 @@ namespace Xabe.FileLock
         private const string Extension = "lock";
         private readonly LockModel _content;
         private readonly string _path;
-        private Timer _timer;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private FileLock()
         {
@@ -42,7 +42,7 @@ namespace Xabe.FileLock
         /// </summary>
         public void Dispose()
         {
-            _timer?.Dispose();
+            _cancellationTokenSource.Cancel();
             if(File.Exists(_path))
                 File.Delete(_path);
         }
@@ -82,9 +82,15 @@ namespace Xabe.FileLock
 
             if(refreshContinuously)
             {
-                var autoEvent = new AutoResetEvent(false);
                 var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
-                _timer = new Timer(async state => await AddTime(TimeSpan.FromMilliseconds(refreshTime)), autoEvent, 0, refreshTime);
+                Task.Run(async () =>
+                {
+                    while(!_cancellationTokenSource.IsCancellationRequested)
+                    {
+                        await AddTime(TimeSpan.FromMilliseconds(refreshTime));
+                        await Task.Delay(refreshTime);
+                    }
+                }, _cancellationTokenSource.Token);
             }
             return true;
         }
