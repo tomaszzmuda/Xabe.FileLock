@@ -14,28 +14,43 @@ namespace Xabe.FileLock
             _path = path;
         }
 
-        internal async Task SetReleaseDate(DateTime date)
+        internal async Task<bool> TrySetReleaseDate(DateTime date)
         {
-            using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+            try
             {
-                using(var sr = new StreamWriter(fs, Encoding.UTF8))
+                using(var fs = new FileStream(_path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
-                    await sr.WriteAsync(date.ToUniversalTime()
-                                            .Ticks.ToString());
+                    using(var sr = new StreamWriter(fs, Encoding.UTF8))
+                    {
+                        await sr.WriteAsync(date.ToUniversalTime()
+                                                .Ticks.ToString());
+                    }
                 }
             }
+            catch(Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         internal async Task<DateTime> GetReleaseDate(string path = "")
         {
-            using(var fs = new FileStream(string.IsNullOrWhiteSpace(path) ? _path : path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            try
             {
-                using(var sr = new StreamReader(fs, Encoding.UTF8))
+                using(var fs = new FileStream(string.IsNullOrWhiteSpace(path) ? _path : path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    string text = await sr.ReadToEndAsync();
-                    long ticks = long.Parse(text);
-                    return new DateTime(ticks, DateTimeKind.Utc);
+                    using(var sr = new StreamReader(fs, Encoding.UTF8))
+                    {
+                        string text = await sr.ReadToEndAsync();
+                        long ticks = long.Parse(text);
+                        return new DateTime(ticks, DateTimeKind.Utc);
+                    }
                 }
+            }
+            catch(Exception)
+            {
+                return DateTime.MaxValue;
             }
         }
     }

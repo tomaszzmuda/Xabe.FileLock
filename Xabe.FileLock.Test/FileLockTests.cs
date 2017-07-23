@@ -78,7 +78,8 @@ namespace Xabe.FileLock.Test
                     string pathToLock = Path.ChangeExtension(file.FullName, Extension);
                     using(FileStream stream = File.Open(pathToLock, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
                     {
-                        await Assert.ThrowsAsync<IOException>(async () => await fileLock.AddTime(TimeSpan.FromHours(1)));
+                        await fileLock.AddTime(TimeSpan.FromHours(1));
+                        Assert.False(await new FileLock(file).TryAcquire(TimeSpan.MaxValue, false));
                     }
                 }
         }
@@ -92,6 +93,7 @@ namespace Xabe.FileLock.Test
                 using(fileLock)
                 {
                     Assert.True(File.Exists(Path.ChangeExtension(file.FullName, Extension)));
+                    fileLock.Dispose();
                 }
 
             Assert.False(File.Exists(Path.ChangeExtension(file.FullName, Extension)));

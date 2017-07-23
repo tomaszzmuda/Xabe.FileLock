@@ -11,9 +11,9 @@ namespace Xabe.FileLock
     public class FileLock: ILock
     {
         private const string Extension = "lock";
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly LockModel _content;
         private readonly string _path;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private FileLock()
         {
@@ -53,7 +53,7 @@ namespace Xabe.FileLock
         /// <param name="lockTime">How much time add to lock</param>
         public async Task AddTime(TimeSpan lockTime)
         {
-            await _content.SetReleaseDate(await _content.GetReleaseDate() + lockTime);
+            await _content.TrySetReleaseDate(await _content.GetReleaseDate() + lockTime);
         }
 
         /// <inheritdoc />
@@ -63,8 +63,7 @@ namespace Xabe.FileLock
                await _content.GetReleaseDate() > DateTime.UtcNow)
                 return false;
 
-            await _content.SetReleaseDate(releaseDate);
-            return true;
+            return await _content.TrySetReleaseDate(releaseDate);
         }
 
         /// <inheritdoc />
@@ -72,13 +71,19 @@ namespace Xabe.FileLock
         {
             if(!File.Exists(_path))
             {
-                await _content.SetReleaseDate(DateTime.Now + lockTime);
+                if(!await _content.TrySetReleaseDate(DateTime.Now + lockTime))
+                {
+                    return false;
+                }
                 return true;
             }
             if(File.Exists(_path) &&
                await _content.GetReleaseDate() > DateTime.UtcNow)
                 return false;
-            await _content.SetReleaseDate(DateTime.Now + lockTime);
+            if(!await _content.TrySetReleaseDate(DateTime.Now + lockTime))
+            {
+                return false;
+            }
 
             if(refreshContinuously)
             {
