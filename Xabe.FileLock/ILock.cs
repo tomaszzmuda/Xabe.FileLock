@@ -15,6 +15,12 @@ namespace Xabe.FileLock
         Task AddTime(TimeSpan lockTime);
 
         /// <summary>
+        ///     Get current lock release date
+        /// </summary>
+        /// <returns>Estimated date when lock gets released. DateTime.MaxValue if no lock exists.</returns>
+        Task<DateTime> GetReleaseDate();
+
+        /// <summary>
         ///     Acquire lock.
         /// </summary>
         /// <param name="releaseDate">Date after that lock is released</param>

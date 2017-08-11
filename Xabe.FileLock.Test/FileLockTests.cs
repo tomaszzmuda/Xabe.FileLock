@@ -129,5 +129,24 @@ namespace Xabe.FileLock.Test
             var fileDate = new DateTime(long.Parse(File.ReadAllText(Path.ChangeExtension(file.FullName, Extension))));
             Assert.True(fileDate - DateTime.UtcNow - TimeSpan.FromHours(2) < _timeVariable);
         }
+
+        [Fact]
+        public async void GetTimeReturnsMaxValueWithNoLock()
+        {
+            var file = new FileInfo(Path.GetTempFileName());
+            var fileLock = new FileLock(file);
+            DateTime dateTime = await fileLock.GetReleaseDate();
+            Assert.Equal(DateTime.MaxValue, dateTime);
+        }
+
+        [Fact]
+        public async void GetTimeReturnsCurrentReleaseDate()
+        {
+            var file = new FileInfo(Path.GetTempFileName());
+            var fileLock = new FileLock(file);
+            await fileLock.TryAcquire(TimeSpan.FromHours(1));
+            DateTime dateTime = await fileLock.GetReleaseDate();
+            Assert.NotEqual(DateTime.MaxValue, dateTime);
+        }
     }
 }
