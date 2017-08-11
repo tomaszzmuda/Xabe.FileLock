@@ -17,7 +17,7 @@ This will create lock file with extension ".lock" in the same directory. Example
 
 Last parameter is optional and defines if lock should be automatically refreshing before expired.
 
-If file already has lock file, and it time haven't expired, method returns null.
+If file already has lock file, and it time haven't expired, method returns false.
 
 ## Recommended using ##
 

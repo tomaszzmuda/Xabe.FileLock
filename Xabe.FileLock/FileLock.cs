@@ -56,6 +56,15 @@ namespace Xabe.FileLock
             await _content.TrySetReleaseDate(await _content.GetReleaseDate() + lockTime);
         }
 
+        /// <summary>
+        ///     Get current lock release date
+        /// </summary>
+        /// <returns>Estimated date when lock gets released. DateTime.MaxValue if no lock exists.</returns>
+        public async Task<DateTime> GetReleaseDate()
+        {
+          return await _content.GetReleaseDate();
+        }
+
         /// <inheritdoc />
         public async Task<bool> TryAcquire(DateTime releaseDate)
         {
