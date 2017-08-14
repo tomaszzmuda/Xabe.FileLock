@@ -32,4 +32,4 @@ If file already has lock file, and it time haven't expired, method returns false
 	
 ## Lincence ## 
 
-Xabe.FileLock is licensed under MIT - see [License](License.md) for details.
+Xabe.FileLock is licensed under MIT - see [License](LICENSE.md) for details.
