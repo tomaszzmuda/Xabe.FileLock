@@ -1,11 +1,13 @@
 #!/bin/bash
 dotnet restore
 dotnet test Xabe.FileLock.Test/
+cd Xabe.FileLock
+dotnet clean -c Release
+
 if [[ -z "${TRAVIS_TAG}" ]]; then 
-	exit 0
+	dotnet build /p:GenerateDocumentationFile=true
+	dotnet pack --no-build -o nuget /p:GenerateDocumentationFile=true
 else
-	cd Xabe.FileLock
-	dotnet clean -c Release
 	dotnet build -c Release /property:Version=$TRAVIS_TAG /p:GenerateDocumentationFile=true
 	dotnet pack --no-build -c Release -o nuget /p:PackageVersion=$TRAVIS_TAG /p:GenerateDocumentationFile=true
 	dotnet nuget push nuget/*.nupkg -k $NUGET_API -s https://www.nuget.org/api/v2/package

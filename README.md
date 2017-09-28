@@ -1,6 +1,12 @@
-# Xabe.FileLock  [![Build Status](https://travis-ci.org/tomaszzmuda/Xabe.FileLock.svg?branch=master)](https://travis-ci.org/tomaszzmuda/Xabe.FileLock)
+# Xabe.FileLock  
+[![Build Status](https://travis-ci.org/tomaszzmuda/Xabe.FileLock.svg?branch=master)](https://travis-ci.org/tomaszzmuda/Xabe.FileLock)
+[![NuGet version](https://badge.fury.io/nu/Xabe.FileLock.svg)](https://badge.fury.io/nu/Xabe.FileLock)
+[![GitHub issues](https://img.shields.io/github/issues/tomaszzmuda/Xabe.FileLock.svg)](https://github.com/tomaszzmuda/Xabe.FileLock/issues)
+[![GitHub stars](https://img.shields.io/github/stars/tomaszzmuda/Xabe.FileLock.svg)](https://github.com/tomaszzmuda/Xabe.FileLock/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tomaszzmuda/Xabe.FileLock/master/LICENSE.md)
+[![HitCount](http://hits.dwyl.io/tomaszzmuda/Xabe.FileLock.svg)](http://hits.dwyl.io/tomaszzmuda/Xabe.FileLock)
 
-Simple .net core library providing exclusive lock on file.
+.NET Standard library providing exclusive lock on file.
 
 ## Using ##
 

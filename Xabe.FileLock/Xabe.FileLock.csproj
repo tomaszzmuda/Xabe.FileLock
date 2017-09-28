@@ -7,17 +7,18 @@
     <PackageProjectUrl>https://github.com/tomaszzmuda/Xabe.FileLock</PackageProjectUrl>
     <PackageTags>file lock filelock file-lock locking files concurrency core</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <TargetFramework>netstandard1.3</TargetFramework>
     <Authors>Tomasz Żmuda</Authors>
     <Company>Xabe</Company>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <Description>Simple .net core library providing exclusive lock on file.</Description>
+    <Description>Cross-platform library providing exclusive lock on file.</Description>
     <RepositoryUrl>https://github.com/tomaszzmuda/Xabe.FileLock</RepositoryUrl>
     <RepositoryType>Dependency</RepositoryType>
     <Copyright>Copyright 2017 (c) Tomasz Zmuda.</Copyright>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <PackageIconUrl>https://raw.githubusercontent.com/tomaszzmuda/Xabe.FileLock/master/NugetIcon.png</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
