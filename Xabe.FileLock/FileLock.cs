@@ -19,6 +19,7 @@ namespace Xabe.FileLock
         {
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Creates reference to file lock on target file
         /// </summary>
@@ -37,6 +38,7 @@ namespace Xabe.FileLock
             _content = new LockModel(_path);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Stop refreshing lock and delete lock file
         /// </summary>
@@ -47,6 +49,7 @@ namespace Xabe.FileLock
                 File.Delete(_path);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Extend lock by certain amount of time
         /// </summary>
@@ -56,6 +59,7 @@ namespace Xabe.FileLock
             await _content.TrySetReleaseDate(await _content.GetReleaseDate() + lockTime);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///     Get current lock release date
         /// </summary>
