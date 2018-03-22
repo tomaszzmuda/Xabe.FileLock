@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Xabe.FileLock
+namespace Xabe
 {
     internal class LockModel
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Xabe.FileLock
+namespace Xabe
 {
     /// <summary>
     ///     Implementetion of FileLock
     /// </summary>
-    public interface ILock: IDisposable
+    public interface ILock : IDisposable
     {
         /// <summary>
         ///     Extend lock by certain amount of time

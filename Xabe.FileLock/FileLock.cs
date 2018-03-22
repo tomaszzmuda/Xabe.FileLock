@@ -3,12 +3,12 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Xabe.FileLock
+namespace Xabe
 {
     /// <summary>
     ///     Providing file locks
     /// </summary>
-    public class FileLock: ILock
+    public class FileLock : ILock
     {
         private const string Extension = "lock";
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -24,7 +24,7 @@ namespace Xabe.FileLock
         ///     Creates reference to file lock on target file
         /// </summary>
         /// <param name="fileToLock">File we want lock</param>
-        public FileLock(FileInfo fileToLock): this(fileToLock.FullName)
+        public FileLock(FileInfo fileToLock) : this(fileToLock.FullName)
         {
         }
 
@@ -66,7 +66,7 @@ namespace Xabe.FileLock
         /// <returns>Estimated date when lock gets released. DateTime.MaxValue if no lock exists.</returns>
         public async Task<DateTime> GetReleaseDate()
         {
-          return await _content.GetReleaseDate();
+            return await _content.GetReleaseDate();
         }
 
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace Xabe.FileLock
 
             if(refreshContinuously)
             {
-                var refreshTime = (int) (lockTime.TotalMilliseconds * 0.9);
+                var refreshTime = (int)(lockTime.TotalMilliseconds * 0.9);
                 Task.Run(async () =>
                 {
                     while(!_cancellationTokenSource.IsCancellationRequested)

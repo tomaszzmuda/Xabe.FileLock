@@ -3,22 +3,22 @@
   <PropertyGroup>
     <PackageId>Xabe.FileLock</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
-    <PackageLicenseUrl>https://github.com/tomaszzmuda/Xabe.FileLock/blob/master/LICENSE.md</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/tomaszzmuda/Xabe.FileLock</PackageProjectUrl>
+    <PackageLicenseUrl>https://xabe.net/product/xabe_filelock/#license</PackageLicenseUrl>
+    <PackageProjectUrl>https://xabe.net/product/xabe_filelock/</PackageProjectUrl>
     <PackageTags>file lock filelock file-lock locking files concurrency core</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes></PackageReleaseNotes>
     <TargetFramework>netstandard1.3</TargetFramework>
     <Authors>Tomasz Żmuda</Authors>
-    <Company>Xabe</Company>
+    <Company>Xabe Tomasz Żmuda</Company>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Description>Cross-platform library providing exclusive lock on file.</Description>
     <RepositoryUrl>https://github.com/tomaszzmuda/Xabe.FileLock</RepositoryUrl>
     <RepositoryType>Dependency</RepositoryType>
-    <Copyright>Copyright 2017 (c) Tomasz Zmuda.</Copyright>
+    <Copyright>Copyright 2017-2018 (c) Xabe Tomasz Zmuda.</Copyright>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <PackageIconUrl>https://raw.githubusercontent.com/tomaszzmuda/Xabe.FileLock/master/NugetIcon.png</PackageIconUrl>
+    <PackageIconUrl>https://xabe.net/assets/Xabe_logo_100x100_black.png</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

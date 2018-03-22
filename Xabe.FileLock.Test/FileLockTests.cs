@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using Xunit;
 
-namespace Xabe.FileLock.Test
+namespace Xabe.Test
 {
     public class FileLockTests
     {
