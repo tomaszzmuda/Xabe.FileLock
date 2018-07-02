@@ -18,7 +18,7 @@
     <Copyright>Copyright 2017-2018 (c) Xabe Tomasz Zmuda.</Copyright>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <PackageIconUrl>https://xabe.net/assets/Xabe_logo_100x100_black.png</PackageIconUrl>
+    <PackageIconUrl>https://xabe.net/assets/new_xabe_logo-100x100.png</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
