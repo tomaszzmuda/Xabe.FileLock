@@ -8,7 +8,7 @@
     <PackageTags>file lock filelock file-lock locking files concurrency core</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFrameworks>netstandard1.3;netcoreapp2.0;net46</TargetFrameworks>
     <Authors>Tomasz Żmuda</Authors>
     <Company>Xabe Tomasz Żmuda</Company>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
@@ -23,9 +23,13 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.3\Xabe.FileLock.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netcoreapp2.0\Xabe.FileLock.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\net46\Xabe.FileLock.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netstandard1.3\Xabe.FileLock.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netcoreapp2.0\Xabe.FileLock.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\net46\Xabe.FileLock.xml</DocumentationFile>
   </PropertyGroup>
 </Project>
